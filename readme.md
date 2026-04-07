@@ -221,7 +221,7 @@ sed -i 's/\r//' /usr/bin/Xiaoyuanwang/campus_login.sh
 2. 如果需要设置开机自启，可以在OpenWRT管理页面中的 系统>启动项>本地启动脚本 中，添加下列指令即可
 
    ```
-   sleep 120 && sh /usr/bin/Xiaoyuanwang/campus_login.sh > /dev/null 2>&1 &
+   sleep 120 && sh /usr/bin/Xiaoyuanwang/campus_login.sh >> /tmp/campus_login.log 2>&1 &
    ```
 
 此处默认开机后2分钟后再进行认证，如需修改，请手动将sleep 120处的120修改为相应的秒数。

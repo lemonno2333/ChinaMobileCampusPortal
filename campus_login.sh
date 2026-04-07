@@ -10,7 +10,6 @@ COOKIE="/tmp/campus_cookie.txt"
 CAPTCHA_IMG="/tmp/captcha.jpg"
 SOLVE_SCRIPT="/usr/bin/Xiaoyuanwang/solve_captcha-Router.py"
 MAX_RETRIES=5
-CHECK_HOST="223.5.5.5"
 
 log() {
     echo "[$(date '+%H:%M:%S')] $1"
@@ -26,14 +25,34 @@ login_once() {
     rm -f "$COOKIE" "$CAPTCHA_IMG"
 
     # 1. 建立 session
-    curl -s -c "$COOKIE" \
-        "${PORTAL}/user/unionautologin.do?${PARAMS}" \
-        -o /dev/null
-    
-    if [ ! -f "$COOKIE" ]; then
-        log "无法连接到认证服务器"
-        return 1
-    fi
+    for session_try in 1 2 3 4; do
+        curl -s -c "$COOKIE" \
+            "${PORTAL}/user/unionautologin.do?${PARAMS}" \
+            -o /dev/null
+
+        COOKIE_LINES=$(grep -Evc '^\s*(#|$)' "$COOKIE" 2>/dev/null)
+
+        if [ -f "$COOKIE" ] && [ -n "$COOKIE_LINES" ] && [ "$COOKIE_LINES" -gt 0 ]; then
+            log "建立 session 成功"
+            break
+        fi
+
+        if [ "$session_try" -eq 4 ]; then
+            log "建立 session 第 4 次失败，终止"
+            return 1
+        fi
+
+        if [ "$session_try" -eq 1 ]; then
+            log "建立 session 失败或结果为空，1 分钟后重试"
+            sleep 60
+        elif [ "$session_try" -eq 2 ]; then
+            log "建立 session 第 2 次失败，5 分钟后重试"
+            sleep 300
+        elif [ "$session_try" -eq 3 ]; then
+            log "建立 session 第 3 次失败，10 分钟后重试"
+            sleep 600
+        fi
+    done
 
     # 2. 下载验证码
     curl -s -b "$COOKIE" \
