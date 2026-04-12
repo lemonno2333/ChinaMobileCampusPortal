@@ -10,6 +10,7 @@ COOKIE="/tmp/campus_cookie.txt"
 CAPTCHA_IMG="/tmp/captcha.jpg"
 SOLVE_SCRIPT="/usr/bin/Xiaoyuanwang/solve_captcha-Router.py"
 MAX_RETRIES=5
+CHECK_HOST="223.5.5.5"  # 用阿里DNS检测网络连通性
 
 log() {
     echo "[$(date '+%H:%M:%S')] $1"
